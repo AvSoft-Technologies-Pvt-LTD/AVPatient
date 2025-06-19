@@ -335,7 +335,7 @@ const MultiStepForm = () => {
           cities: [],
           isCurrentLocation: false
         });
-        navigate("/dashboard/book-appointment");
+        navigate("/dashboard/app");
       }, 100);
     } catch (error) {
       console.error("Booking failed:", error);
