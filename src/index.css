@@ -443,3 +443,46 @@ body { @apply font-sans text-[var(--primary-color)] bg-white leading-relaxed; fo
   background: #6AC9F5 !important;
   color: #fff !important;
 }
+
+/* Ambulance blink */
+.blink-bg {
+  animation: blinkRedShine 1s linear infinite, bounceBtn 1s linear infinite;
+}
+
+@keyframes blinkRedShine {
+
+  0%,
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  50% {
+    background-color: #EF4444;
+    box-shadow: 0 0 16px 4px #EF4444, 0 0 32px 8px #fff3;
+  }
+}
+
+@keyframes bounceBtn {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  20% {
+    transform: translateY(-8px);
+  }
+
+  40% {
+    transform: translateY(0);
+  }
+
+  60% {
+    transform: translateY(-4px);
+  }
+
+  80% {
+    transform: translateY(0);
+  }
+}

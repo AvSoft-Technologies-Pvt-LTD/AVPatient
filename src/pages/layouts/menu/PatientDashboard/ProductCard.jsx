@@ -21,7 +21,7 @@ const ProductCard = ({ product, updateCartCount }) => {
         key={index}
         className={`h-4 w-4 ${
           index < Math.floor(rating)
-            ? 'text-yellow-400 fill-current'
+            ? 'text-yellow-400 fill-current '
             : 'text-gray-300'
         }`}
       />
@@ -29,20 +29,24 @@ const ProductCard = ({ product, updateCartCount }) => {
   };
 
   return (
-    <Link to={`//${product.id}`} className="group">
+    <Link to={`/dashboard/product/${product.id}`} className="group">
       <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden ">
         {/* Image Container */}
         <div className="relative overflow-hidden">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-          />
-          {product.originalPrice && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-semibold">
-              SAVE ${(product.originalPrice - product.price).toFixed(2)}
-            </div>
-          )}
+          <div className="relative flex items-center justify-center h-48 overflow-hidden">
+  <img
+    src={product.image}
+    alt={product.name}
+    className="object-contain h-full transition-transform duration-300 group-hover:scale-110"
+  />
+
+  {product.originalPrice && (
+    <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-semibold">
+      SAVE ₹{(product.originalPrice - product.price).toFixed(2)}
+    </div>
+  )}
+</div>
+
           <button className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-50">
             <Heart className="h-4 w-4 text-gray-600" />
           </button>
@@ -62,28 +66,28 @@ const ProductCard = ({ product, updateCartCount }) => {
           </div>
 
           {/* Product Name */}
-          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+          <h3 className="font-semibold text-sm text-gray-900 mb-2">
             {product.name}
           </h3>
 
           {/* Rating */}
           <div className="flex items-center space-x-1 mb-3">
-            <div className="flex">
+            <div className="flex ">
               {renderStars(product.rating)}
             </div>
-            <span className="text-sm text-gray-600">
+            <span className="text-xs text-gray-600">
               ({product.reviews})
             </span>
           </div>
 
           {/* Price */}
           <div className="flex items-center space-x-2 mb-4">
-            <span className="text-lg font-bold text-gray-900">
-              ${product.price.toFixed(2)}
+            <span className=" font-semibold ">
+              ₹{product.price.toFixed(2)}
             </span>
             {product.originalPrice && (
               <span className="text-sm text-gray-500 line-through">
-                ${product.originalPrice.toFixed(2)}
+                ₹{product.originalPrice.toFixed(2)}
               </span>
             )}
           </div>
@@ -129,7 +133,7 @@ const ProductsPage = () => {
     // Fetch products data from API
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('https://mocki.io/v1/9ac68a4d-a229-4f72-ade0-0f5aaa7b7657'); // Replace with your API endpoint
+        const response = await axios.get('https://mocki.io/v1/7fca606c-abc8-4397-b797-a380fc8be7d7'); // Replace with your API endpoint
         setProducts(response.data);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -183,7 +187,7 @@ const categories = useMemo(() => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <header className=" sticky top-0 z-50">
+        <header className="  top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="hidden md:flex flex-1 max-w-lg mx-8">
@@ -203,7 +207,7 @@ const categories = useMemo(() => {
 
               {/* Navigation - Desktop */}
               <nav className="hidden md:flex items-center space-x-6">
-                <Link to="" className="text-gray-700 hover:text-[var(--primary-color)] font-medium">
+                <Link to="/dashboard/orders" className="text-gray-700 hover:text-[var(--primary-color)] font-medium">
                   Orders
                 </Link>
                 
@@ -324,8 +328,8 @@ const categories = useMemo(() => {
                     />
                   </div>
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>${priceRange[0]}</span>
-                    <span>${priceRange[1]}</span>
+                    <span>₹{priceRange[0]}</span>
+                    <span>₹{priceRange[1]}</span>
                   </div>
                 </div>
               </div>

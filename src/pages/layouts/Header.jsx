@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Search, Bell, Pill, Ambulance } from "lucide-react";
+import { Search, Bell, Pill } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { FaAmbulance } from "react-icons/fa";
 
 const HeaderWithNotifications = () => {
   const [notifications, setNotifications] = useState([]), [showNotifications, setShowNotifications] = useState(false), navigate = useNavigate();
@@ -85,9 +86,9 @@ const HeaderWithNotifications = () => {
 <button
   onClick={() => navigate('/dashboard/ambulance')}
   title="Ambulance"
-  className="group p-3 rounded-full bg-red-100 transition-all duration-300 transform hover:scale-110 hover:bg-red-500 hover:shadow-md"
+  className="group px-3 py-2 rounded-full bg-transparent transition-all duration-300 transform hover:scale-110 hover:bg-red-500 blink-bg"
 >
-  <Ambulance className="h-5 w-5 text-red-600 transition-all duration-300 group-hover:text-white " />
+  <FaAmbulance className="h-6 w-6 text-white transition-colors duration-300 group-hover:text-white" />
 </button>
 
 

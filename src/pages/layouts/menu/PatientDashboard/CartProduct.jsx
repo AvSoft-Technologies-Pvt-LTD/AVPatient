@@ -88,7 +88,7 @@ const { items = [], total = 0, updateQuantity, removeItem, itemCount = 0 } = use
                           </h3>
                           <p className="paragraph">{item.product.brand}</p>
                           <p className="paragraph">
-                            ${item.product.price.toFixed(2)}
+                            ₹{item.product.price.toFixed(2)}
                           </p>
                         </div>
                         
@@ -121,7 +121,7 @@ const { items = [], total = 0, updateQuantity, removeItem, itemCount = 0 } = use
                     {/* Item Total */}
                     <div className="mt-4 sm:mt-0 sm:ml-6 text-right">
                       <p className="paragraph">
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        ₹{(item.product.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -146,15 +146,15 @@ const { items = [], total = 0, updateQuantity, removeItem, itemCount = 0 } = use
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
                   <span className="font-medium">
-                    {shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}
+                    {shipping === 0 ? 'Free' : `₹${shipping.toFixed(2)}`}
                   </span>
                 </div>
                 
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tax</span>
-                  <span className="font-medium">${tax.toFixed(2)}</span>
+                  <span className="font-medium">₹{tax.toFixed(2)}</span>
                 </div>
-                
+
                 {shipping === 0 && (
                   <div className="bg-green-50 p-3 rounded-lg">
                     <p className="text-sm text-green-800">
@@ -166,7 +166,7 @@ const { items = [], total = 0, updateQuantity, removeItem, itemCount = 0 } = use
                 {total < 100 && (
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <p className="text-sm text-blue-800">
-                      Add ${(100 - total).toFixed(2)} more for free shipping
+                      Add ₹{(100 - total).toFixed(2)} more for free shipping
                     </p>
                   </div>
                 )}
@@ -175,7 +175,7 @@ const { items = [], total = 0, updateQuantity, removeItem, itemCount = 0 } = use
                   <div className="flex justify-between">
                     <span className="text-lg font-semibold">Total</span>
                     <span className="text-lg font-bold text-[var(--primary-color)]">
-                      ${finalTotal.toFixed(2)}
+                      ₹{finalTotal.toFixed(2)}
                     </span>
                   </div>
                 </div>

@@ -1,11 +1,9 @@
-
-
 import { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaStethoscope, FaCalendarAlt, FaClock, FaUser, FaHospital } from 'react-icons/fa';
-import drimg from "../assets/avtar.jpg"
+
 const symptomSpecialtyMap = {
   fever: ["General Physician", "Pediatrics", "Pathology", "Psychiatry", "Oncology"],
   cough: ["General Physician", "Pulmonology", "ENT", "Oncology", "Pathology"],
@@ -22,11 +20,10 @@ const symptomSpecialtyMap = {
   jointpain: ["Orthopedics", "General Medicine", "Endocrinology"]
 };
 
-// State-wise cities mapping
 const stateCityMap = {
   "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad", "Solapur", "Amravati", "Kolhapur"],
   "Delhi": ["New Delhi", "Delhi"],
-  "Karnataka": ["Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum", "Gulbarga","Dharwad"],
+  "Karnataka": ["Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum", "Gulbarga", "Dharwad"],
   "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"],
   "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar"],
   "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli"],
@@ -61,94 +58,128 @@ const stateCityMap = {
 };
 
 const MultiStepForm = () => {
-  const suggestedValues = {
-    location: sessionStorage.getItem('suggestedLocation') || "",
-    specialty: sessionStorage.getItem('suggestedSpecialty') || "",
-    doctorType: sessionStorage.getItem('suggestedDoctorType') || "All",
-    symptoms: sessionStorage.getItem('suggestedSymptoms') || ""
+  const location = useLocation();
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.auth?.user);
+
+  // Get preserved state from navigation or session storage
+  const getInitialState = () => {
+    // First check if state was passed from navigation (when coming back from doctor list)
+    if (location.state?.preservedFormState) {
+      return location.state.preservedFormState;
+    }
+    
+    // Otherwise, get from session storage or use suggested values
+    const suggestedValues = {
+      location: sessionStorage.getItem('suggestedLocation') || "",
+      specialty: sessionStorage.getItem('suggestedSpecialty') || "",
+      doctorType: sessionStorage.getItem('suggestedDoctorType') || "All",
+      symptoms: sessionStorage.getItem('suggestedSymptoms') || ""
+    };
+
+    return {
+      consultationType: sessionStorage.getItem('formState_consultationType') || "Physical",
+      symptoms: sessionStorage.getItem('formState_symptoms') || suggestedValues.symptoms,
+      specialty: sessionStorage.getItem('formState_specialty') || suggestedValues.specialty,
+      specialties: [],
+      selectedDoctor: null,
+      doctors: [],
+      filteredDoctors: [],
+      states: Object.keys(stateCityMap),
+      selectedState: sessionStorage.getItem('formState_selectedState') || "",
+      cities: [],
+      location: sessionStorage.getItem('formState_location') || suggestedValues.location,
+      doctorType: sessionStorage.getItem('formState_doctorType') || suggestedValues.doctorType,
+      hospitalName: sessionStorage.getItem('formState_hospitalName') || "",
+      minPrice: sessionStorage.getItem('formState_minPrice') || "",
+      maxPrice: sessionStorage.getItem('formState_maxPrice') || "",
+      selectedDate: "",
+      selectedTime: "",
+      fullAddress: sessionStorage.getItem('formState_fullAddress') || "",
+      showBookingModal: false,
+      showConfirmationModal: false,
+      isLoading: false,
+      loadingCities: false,
+      isCurrentLocation: sessionStorage.getItem('formState_isCurrentLocation') === 'true'
+    };
   };
 
-  const [state, setState] = useState({
-    consultationType: "Physical",
-    symptoms: suggestedValues.symptoms,
-    specialty: suggestedValues.specialty,
-    specialties: [],
-    selectedDoctor: null,
-    doctors: [],
-    filteredDoctors: [],
-    states: Object.keys(stateCityMap),
-    selectedState: "",
-    cities: [],
-    location: suggestedValues.location,
-    doctorType: suggestedValues.doctorType,
-    hospitalName: "",
-    minPrice: "",
-    maxPrice: "",
-    selectedDate: '',
-    selectedTime: '', 
-    fullAddress: '',
-    showBookingModal: false,
-    showConfirmationModal: false,
-    isLoading: false,
-    loadingCities: false,
-    isCurrentLocation: false
-  });
-  
-  const user = useSelector((state) => state.auth.user);
-  const navigate = useNavigate();
+  const [state, setState] = useState(getInitialState);
+const [formSteps, setFormSteps] = useState([]);
 
-  const updateState = (updates) => setState(prev => ({ ...prev, ...updates }));
+  const updateState = (updates) => {
+    setState(prev => {
+      const newState = { ...prev, ...updates };
+      
+      // Save important form state to session storage
+      const formStateKeys = [
+        'consultationType', 'symptoms', 'specialty', 'selectedState', 
+        'location', 'doctorType', 'hospitalName', 'minPrice', 'maxPrice',
+        'fullAddress', 'isCurrentLocation'
+      ];
+      
+      formStateKeys.forEach(key => {
+        if (newState[key] !== undefined && newState[key] !== null) {
+          sessionStorage.setItem(`formState_${key}`, newState[key].toString());
+        }
+      });
+      
+      return newState;
+    });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const doctorsRes = await axios.get("https://mocki.io/v1/6e2c8f67-dba8-43ba-a976-14ef281cc564");
-
-        updateState({ 
-          doctors: doctorsRes.data,
-          loadingCities: false 
-        });
-
-        if (suggestedValues.specialty && suggestedValues.doctorType === "AV Swasthya") {
-          const filtered = doctorsRes.data.filter(d => 
-            d.specialty === suggestedValues.specialty &&
-            d.doctorType === "AV Swasthya" &&
-            (suggestedValues.location ? d.location === suggestedValues.location : true)
+        updateState({ doctors: doctorsRes.data || [], loadingCities: false });
+        
+        // Restore cities if selectedState exists
+        if (state.selectedState) {
+          const cities = stateCityMap[state.selectedState] || [];
+          updateState({ cities });
+        }
+        
+        if (state.specialty && state.doctorType === "AV Swasthya") {
+          const filtered = (doctorsRes.data || []).filter(d => 
+            d.specialty === state.specialty && 
+            d.doctorType === "AV Swasthya" && 
+            (state.location ? d.location === state.location : true)
           );
           updateState({ filteredDoctors: filtered });
         }
-
-        if (suggestedValues.symptoms) {
-          const val = suggestedValues.symptoms.toLowerCase().replace(/\s/g, "");
+        
+        if (state.symptoms) {
+          const val = state.symptoms.toLowerCase().replace(/\s/g, "");
           updateState({ specialties: symptomSpecialtyMap[val] || [] });
         }
       } catch (err) {
-        console.error('Failed to fetch data:', err);
+        console.error("Failed to fetch data:", err);
+        updateState({ doctors: [], filteredDoctors: [] });
       }
     };
-
+    
     fetchData();
-    return () => {
-      Object.keys(suggestedValues).forEach(key => 
-        sessionStorage.removeItem(`suggested${key.charAt(0).toUpperCase() + key.slice(1)}`)
-      );
-    };
   }, []);
 
   useEffect(() => {
-    const filtered = state.doctors.filter(d => 
-      d.consultationType.toLowerCase() === state.consultationType.toLowerCase() &&
+    // Ensure we have doctors array before filtering
+    if (!state.doctors || !Array.isArray(state.doctors)) {
+      return;
+    }
+
+    const filtered = state.doctors.filter(d =>
+      d.consultationType?.toLowerCase() === state.consultationType.toLowerCase() &&
       d.specialty === state.specialty &&
       (state.consultationType !== "Physical" || d.location === state.location) &&
       (state.minPrice === "" || parseInt(d.fees) >= parseInt(state.minPrice)) &&
       (state.maxPrice === "" || parseInt(d.fees) <= parseInt(state.maxPrice)) &&
-      (state.hospitalName === "" || d.hospital.toLowerCase().includes(state.hospitalName.toLowerCase())) &&
+      (state.hospitalName === "" || d.hospital?.toLowerCase().includes(state.hospitalName.toLowerCase())) &&
       (state.doctorType === "All" || d.doctorType === state.doctorType)
     );
     updateState({ filteredDoctors: filtered });
   }, [state.doctors, state.consultationType, state.specialty, state.location, state.minPrice, state.maxPrice, state.hospitalName, state.doctorType]);
 
-  // Clear location when switching to Virtual consultation
   useEffect(() => {
     if (state.consultationType === "Virtual") {
       updateState({
@@ -161,31 +192,27 @@ const MultiStepForm = () => {
     }
   }, [state.consultationType]);
 
-  const handleStateChange = (e) => {
+  const handleStateChange = e => {
     const selectedState = e.target.value;
     const cities = selectedState ? stateCityMap[selectedState] || [] : [];
-    updateState({ 
-      selectedState, 
-      cities, 
+    updateState({
+      selectedState,
+      cities,
       location: "",
       isCurrentLocation: false
     });
   };
 
   const handleLocationChange = e => {
-    if (e.target.value === 'current-location') {
-      if (!navigator.geolocation) return alert('Geolocation not supported');
-      
+    if (e.target.value === "current-location") {
+      if (!navigator.geolocation) return alert("Geolocation not supported");
       updateState({ isCurrentLocation: true });
-      
-      navigator.geolocation.getCurrentPosition(async (position) => {
+      navigator.geolocation.getCurrentPosition(async position => {
         try {
           const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`);
           const data = await response.json();
-          const detectedCity = data.address.city || data.address.town || data.address.village || "";
-          const detectedState = data.address.state || "";
-          
-          // Find the state that contains this city
+          const detectedCity = data.address?.city || data.address?.town || data.address?.village || "";
+          const detectedState = data.address?.state || "";
           let matchedState = "";
           for (const [stateName, cities] of Object.entries(stateCityMap)) {
             if (cities.some(city => city.toLowerCase().includes(detectedCity.toLowerCase()))) {
@@ -193,24 +220,20 @@ const MultiStepForm = () => {
               break;
             }
           }
-          
-          // If no exact match found, try to match by state name
           if (!matchedState && detectedState) {
             for (const stateName of Object.keys(stateCityMap)) {
-              if (stateName.toLowerCase().includes(detectedState.toLowerCase()) || 
-                  detectedState.toLowerCase().includes(stateName.toLowerCase())) {
+              if (stateName.toLowerCase().includes(detectedState.toLowerCase()) || detectedState.toLowerCase().includes(stateName.toLowerCase())) {
                 matchedState = stateName;
                 break;
               }
             }
           }
-          
           updateState({
             selectedState: matchedState,
             cities: matchedState ? stateCityMap[matchedState] : [],
             location: detectedCity,
             fullAddress: data.display_name || "",
-            states: matchedState ? [matchedState] : Object.keys(stateCityMap), // Show only detected state or all states
+            states: matchedState ? [matchedState] : Object.keys(stateCityMap),
             isCurrentLocation: true
           });
         } catch (error) {
@@ -218,22 +241,21 @@ const MultiStepForm = () => {
           alert("Failed to fetch location");
           updateState({ isCurrentLocation: false });
         }
-      }, (error) => {
+      }, error => {
         console.error("Geolocation error:", error);
         alert("Failed to get your location");
         updateState({ isCurrentLocation: false });
       });
     } else {
-      updateState({ 
-        location: e.target.value, 
-        fullAddress: '',
+      updateState({
+        location: e.target.value,
+        fullAddress: "",
         isCurrentLocation: false
       });
     }
   };
 
-  // Reset states list when manually selecting a different state (not current location)
-  const handleManualStateChange = (e) => {
+  const handleManualStateChange = e => {
     if (!state.isCurrentLocation) {
       updateState({ states: Object.keys(stateCityMap) });
     }
@@ -245,13 +267,17 @@ const MultiStepForm = () => {
 
   const cardWidth = 300;
   const visibleCards = 3;
-  const totalGroups = Math.ceil(state.filteredDoctors.length / visibleCards);
+  
+  // Safe calculation with null check
+  const totalGroups = state.filteredDoctors && Array.isArray(state.filteredDoctors) 
+    ? Math.ceil(state.filteredDoctors.length / visibleCards) 
+    : 0;
 
-  const scrollToGroup = (groupIndex) => {
+  const scrollToGroup = groupIndex => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({
         left: groupIndex * cardWidth * visibleCards,
-        behavior: "smooth",
+        behavior: "smooth"
       });
       setCurrentGroup(groupIndex);
     }
@@ -269,7 +295,6 @@ const MultiStepForm = () => {
       if (scrollRef.current) {
         const container = scrollRef.current;
         const maxScrollLeft = container.scrollWidth - container.clientWidth;
-
         if (container.scrollLeft + 300 >= maxScrollLeft) {
           container.scrollTo({ left: 0, behavior: "smooth" });
         } else {
@@ -277,13 +302,12 @@ const MultiStepForm = () => {
         }
       }
     }, 4000);
-
     return () => clearInterval(interval);
   }, []);
 
   const handleSymptomsChange = e => {
     const val = e.target.value.toLowerCase().replace(/\s/g, "");
-    updateState({ 
+    updateState({
       symptoms: e.target.value,
       specialties: symptomSpecialtyMap[val] || [],
       specialty: ""
@@ -311,8 +335,13 @@ const MultiStepForm = () => {
         message: `New appointment with ${user?.firstName || "a patient"} on ${state.selectedDate} at ${state.selectedTime}. Symptoms: ${state.symptoms || "None"}. ${state.consultationType === "Virtual" ? "Virtual consultation" : `Location: ${state.location || "Not specified"}`}.`
       }
     };
-
-    updateState({ isLoading: true, showBookingModal: false, showConfirmationModal: true });
+    
+    updateState({
+      isLoading: true,
+      showBookingModal: false,
+      showConfirmationModal: true
+    });
+    
     try {
       await Promise.all([
         axios.post("https://67e3e1e42ae442db76d2035d.mockapi.io/register/book", payload),
@@ -320,6 +349,16 @@ const MultiStepForm = () => {
       ]);
       
       setTimeout(() => {
+        // Clear form state from session storage after successful booking
+        const formStateKeys = [
+          'consultationType', 'symptoms', 'specialty', 'selectedState', 
+          'location', 'doctorType', 'hospitalName', 'minPrice', 'maxPrice',
+          'fullAddress', 'isCurrentLocation'
+        ];
+        formStateKeys.forEach(key => {
+          sessionStorage.removeItem(`formState_${key}`);
+        });
+        
         updateState({
           showConfirmationModal: false,
           selectedState: "",
@@ -345,7 +384,39 @@ const MultiStepForm = () => {
     }
   };
 
-  const getTimesForDate = (date) => state.selectedDoctor?.availability.find(slot => slot.date === date)?.times || [];
+  const getTimesForDate = (date) => state.selectedDoctor?.availability?.find(slot => slot.date === date)?.times || [];
+
+  // Function to handle navigation to doctor list with preserved state
+  const handleViewAllDoctors = () => {
+    const currentFormState = {
+      consultationType: state.consultationType,
+      symptoms: state.symptoms,
+      specialty: state.specialty,
+      selectedState: state.selectedState,
+      location: state.location,
+      doctorType: state.doctorType,
+      hospitalName: state.hospitalName,
+      minPrice: state.minPrice,
+      maxPrice: state.maxPrice,
+      fullAddress: state.fullAddress,
+      isCurrentLocation: state.isCurrentLocation,
+      cities: state.cities,
+      specialties: state.specialties,
+      doctors: state.doctors,
+      filteredDoctors: state.filteredDoctors || []
+    };
+
+    navigate('/dashboard/alldoctors', {
+      state: {
+        filteredDoctors: state.filteredDoctors || [],
+        preservedFormState: currentFormState
+      }
+    });
+  };
+
+  // Safe array access with default empty array
+  const safeFilteredDoctors = state.filteredDoctors || [];
+  const safeSpecialties = state.specialties || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-4 px-3">
@@ -363,15 +434,13 @@ const MultiStepForm = () => {
 
         {/* Main Form Container */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 space-y-6">
-          
-          {/* Consultation Type - Compact Pills */}
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
               Consultation Type
             </h3>
             <div className="flex gap-4">
-              {["Physical", "Virtual"].map((type) => (
+              {["Physical", "Virtual"].map(type => (
                 <button
                   key={type}
                   onClick={() => updateState({ consultationType: type })}
@@ -387,66 +456,75 @@ const MultiStepForm = () => {
             </div>
           </div>
 
-          {/* State & Location - Only show for Physical consultations */}
-          {state.consultationType === "Physical" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
-                  <FaMapMarkerAlt className="text-emerald-500 text-xs" />
-                  State
-                  {state.isCurrentLocation && (
-                    <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-                       Detected
-                    </span>
-                  )}
-                </label>
-                <select
-                  value={state.selectedState}
-                  onChange={handleManualStateChange}
-                  className="w-full p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm bg-white"
-                  disabled={state.isCurrentLocation}
-                >
-                  <option value="">Select State</option>
-                  {state.states.map(stateName => (
-                    <option key={stateName} value={stateName}>{stateName}</option>
-                  ))}
-                </select>
-              </div>
+         {state.consultationType === "Physical" && (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {/* State Dropdown */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+        <FaMapMarkerAlt className="text-emerald-500 text-xs" />
+        State
+        {state.isCurrentLocation && (
+          <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+            Detected
+          </span>
+        )}
+      </label>
+      <select
+        value={state.selectedState}
+        onChange={handleManualStateChange}
+        className="w-full p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm bg-white"
+        disabled={state.isCurrentLocation}
+      >
+        <option value="">Select State</option>
+        {Array.isArray(state.states) &&
+          state.states.map((stateName) => (
+            <option key={stateName} value={stateName}>
+              {stateName}
+            </option>
+          ))}
+      </select>
+    </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
-                  <FaMapMarkerAlt className="text-emerald-500 text-xs" />
-                  City
-                  {state.isCurrentLocation && (
-                    <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-                       Current
-                    </span>
-                  )}
-                </label>
-                <select
-                  value={state.location}
-                  onChange={handleLocationChange}
-                  disabled={!state.selectedState && !state.isCurrentLocation}
-                  className="w-full p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">Select City</option>
-                  <option value="current-location">📍 Use My Location</option>
-                  {state.cities.map(city => (
-                    <option key={city} value={city}>{city}</option>
-                  ))}
-                </select>
-                {state.location && state.location !== "current-location" && (
-                  <p className="text-xs text-emerald-600 flex items-center gap-1">
-                    <FaMapMarkerAlt className="text-xs" />
-                    {state.location}, {state.selectedState}
-                    {state.isCurrentLocation && " (Current Location)"}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+    {/* City Dropdown */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+        <FaMapMarkerAlt className="text-emerald-500 text-xs" />
+        City
+        {state.isCurrentLocation && (
+          <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+            Current
+          </span>
+        )}
+      </label>
+      <select
+        value={state.location}
+        onChange={handleLocationChange}
+        disabled={!state.selectedState && !state.isCurrentLocation}
+        className="w-full p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
+      >
+        <option value="">Select City</option>
+        <option value="current-location">📍 Use My Location</option>
+        {Array.isArray(state.cities) &&
+          state.cities.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+      </select>
 
-          {/* Virtual Consultation Notice */}
+      {/* Selected City Info */}
+      {state.location && state.location !== "current-location" && (
+        <p className="text-xs text-emerald-600 flex items-center gap-1">
+          <FaMapMarkerAlt className="text-xs" />
+          {state.location}, {state.selectedState}
+          {state.isCurrentLocation && " (Current Location)"}
+        </p>
+      )}
+    </div>
+  </div>
+)}
+
+
           {state.consultationType === "Virtual" && (
             <div className="bg-gradient-to-r from-green-50 to-indigo-50 border border-green-200 rounded-xl p-4">
               <div className="flex items-center gap-3">
@@ -463,49 +541,45 @@ const MultiStepForm = () => {
             </div>
           )}
 
-          {/* Hospital Name & Symptoms */}
           <div className="flex flex-col md:flex-row gap-4 w-full">
-            {/* Hospital (Optional) - Only show for Physical consultations */}
             {state.consultationType === "Physical" && (
               <div className="space-y-2 w-full md:w-1/2">
-                <div className="floating-input relative w-full" data-placeholder="Hospital (Optional)">
-                  <input
-                    type="text"
-                    value={state.hospitalName}
-                    onChange={(e) => updateState({ hospitalName: e.target.value })}
-                    placeholder=" "
-                    className="input-field peer"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Symptoms */}
-            <div className={`space-y-2 w-full ${state.consultationType === "Physical" ? "md:w-1/2" : ""}`}>
-              <div className="floating-input relative w-full" data-placeholder="Symptoms">
+                <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                  <FaHospital className="text-emerald-500 text-xs" />
+                  Hospital (Optional)
+                </label>
                 <input
                   type="text"
-                  value={state.symptoms}
-                  onChange={handleSymptomsChange}
-                  placeholder=" "
-                  className="input-field peer"
+                  value={state.hospitalName}
+                  onChange={e => updateState({ hospitalName: e.target.value })}
+                  placeholder="Enter hospital name"
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm bg-white"
                 />
               </div>
+            )}
+            <div className={`space-y-2 w-full ${state.consultationType === "Physical" ? "md:w-1/2" : ""}`}>
+              <label className="text-sm font-medium text-slate-700">Symptoms</label>
+              <input
+                type="text"
+                value={state.symptoms}
+                onChange={handleSymptomsChange}
+                placeholder="Describe your symptoms"
+                className="w-full p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm bg-white"
+              />
             </div>
           </div>
 
-          {/* Suggested Specialties - Compact Pills */}
-          {state.specialties.length > 0 && (
+          {safeSpecialties.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-slate-700">Suggested Specialties</h3>
               <div className="flex flex-wrap gap-2">
-                {state.specialties.map(spec => (
-                  <button 
-                    key={spec} 
+                {safeSpecialties.map(spec => (
+                  <button
+                    key={spec}
                     onClick={() => updateState({ specialty: spec })}
                     className={`px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-105 ${
-                      state.specialty === spec 
-                        ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md" 
+                      state.specialty === spec
+                        ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md"
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                     }`}
                   >
@@ -516,17 +590,16 @@ const MultiStepForm = () => {
             </div>
           )}
 
-          {/* Doctor Panel - Compact Pills */}
           <div className="space-y-3">
             <h3 className="text-sm font-medium text-slate-700">Doctor Panel</h3>
             <div className="flex flex-wrap gap-2">
-              {["All", "Our Medical Expert","Hospital Affiliated", "Consultant Doctor"].map(type => (
-                <button 
-                  key={type} 
+              {["All", "Our Medical Expert", "Hospital Affiliated", "Consultant Doctor"].map(type => (
+                <button
+                  key={type}
                   onClick={() => updateState({ doctorType: type })}
                   className={`px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-105 ${
-                    state.doctorType === type 
-                      ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md" 
+                    state.doctorType === type
+                      ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
                 >
@@ -536,57 +609,44 @@ const MultiStepForm = () => {
             </div>
           </div>
 
-          {/* Price Range - Compact */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 w-full">
-              <div className="floating-input relative w-full" data-placeholder="Min Fees (₹)">
-                <input
-                  type="number"
-                  value={state.minPrice}
-                  onChange={(e) => updateState({ minPrice: e.target.value })}
-                  placeholder=" "
-                  className="input-field peer "
-                />
-              </div>
+              <label className="text-sm font-medium text-slate-700">Min Fees (₹)</label>
+              <input
+                type="number"
+                value={state.minPrice}
+                onChange={e => updateState({ minPrice: e.target.value })}
+                placeholder="Minimum price"
+                className="w-full p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm bg-white"
+              />
             </div>
-
             <div className="space-y-2 w-full">
-              <div className="floating-input relative w-full" data-placeholder="Max Price">
-                <input
-                  type="number"
-                  value={state.maxPrice}
-                  onChange={(e) => updateState({ maxPrice: e.target.value })}
-                  placeholder=" "
-                  className="input-field peer"
-                />
-              </div>
+              <label className="text-sm font-medium text-slate-700">Max Fees (₹)</label>
+              <input
+                type="number"
+                value={state.maxPrice}
+                onChange={e => updateState({ maxPrice: e.target.value })}
+                placeholder="Maximum price"
+                className="w-full p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm bg-white"
+              />
             </div>
           </div>
 
-          {/* Available Doctors - Compact Cards */}
           <div className="space-y-4">
-            {state.filteredDoctors.length > 0 ? (
+            {safeFilteredDoctors.length > 0 ? (
               <div className="space-y-4">
-                {/* Header */}
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold text-slate-800">
-                    Available Doctors ({state.filteredDoctors.length})
-                  </h3>
+                  <h3 className="text-lg font-semibold text-slate-800">Available Doctors ({safeFilteredDoctors.length})</h3>
                   <button
-                    onClick={() => navigate('/dashboard/alldoctors', { state: { filteredDoctors: state.filteredDoctors } })}
+                    onClick={handleViewAllDoctors}
                     className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-200"
                   >
                     View All →
                   </button>
                 </div>
-
-                {/* Compact Doctor Cards Scroll */}
                 <div className="relative">
-                  <div
-                    ref={scrollRef}
-                    className="flex gap-4 overflow-x-hidden pb-4 scroll-smooth"
-                  >
-                    {state.filteredDoctors.map((doc) => (
+                  <div ref={scrollRef} className="flex gap-4 overflow-x-hidden pb-4 scroll-smooth">
+                    {safeFilteredDoctors.map(doc => (
                       <div
                         key={doc.id}
                         onClick={() => updateState({ selectedDoctor: doc, showBookingModal: true })}
@@ -595,7 +655,7 @@ const MultiStepForm = () => {
                         <div className="flex gap-3 items-start">
                           <div className="relative">
                             <img
-                              src={drimg|| "https://images.pexels.com/photos/5452201/pexels-photo-5452201.jpeg"}
+                              src={doc.image || "https://images.pexels.com/photos/5452201/pexels-photo-5452201.jpeg"}
                               alt={doc.name}
                               className="w-12 h-12 rounded-full object-cover border-2 border-emerald-200"
                             />
@@ -607,7 +667,7 @@ const MultiStepForm = () => {
                             <p className="text-slate-800 font-bold text-lg">₹{doc.fees}</p>
                             <p className="text-slate-500 text-xs flex items-center gap-1">
                               <FaMapMarkerAlt className="text-xs" />
-                              {state.consultationType === "Virtual" ? "Online" : (doc.location || "N/A")}
+                              {state.consultationType === "Virtual" ? "Online" : doc.location || "N/A"}
                             </p>
                             <p className="text-slate-500 text-xs">{doc.doctorType}</p>
                           </div>
@@ -615,34 +675,33 @@ const MultiStepForm = () => {
                       </div>
                     ))}
                   </div>
-
-                  {/* Navigation Arrows */}
-                  <button
-                    onClick={() => scroll(-1)}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-slate-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center hover:bg-emerald-50"
-                  >
-                    <FaChevronLeft className="text-slate-600 text-sm" />
-                  </button>
-                  
-                  <button
-                    onClick={() => scroll(1)}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-slate-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center hover:bg-emerald-50"
-                  >
-                    <FaChevronRight className="text-slate-600 text-sm" />
-                  </button>
-
-                  {/* Dots Indicator */}
-                  <div className="flex justify-center gap-2 mt-4">
-                    {Array.from({ length: totalGroups }).map((_, index) => (
+                  {totalGroups > 1 && (
+                    <>
                       <button
-                        key={index}
-                        onClick={() => scrollToGroup(index)}
-                        className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                          currentGroup === index ? "bg-emerald-500 scale-125" : "bg-slate-300"
-                        }`}
-                      ></button>
-                    ))}
-                  </div>
+                        onClick={() => scroll(-1)}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-slate-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center hover:bg-emerald-50"
+                      >
+                        <FaChevronLeft className="text-slate-600 text-sm" />
+                      </button>
+                      <button
+                        onClick={() => scroll(1)}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-slate-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center hover:bg-emerald-50"
+                      >
+                        <FaChevronRight className="text-slate-600 text-sm" />
+                      </button>
+                      <div className="flex justify-center gap-2 mt-4">
+                        {Array.from({ length: totalGroups }).map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => scrollToGroup(index)}
+                            className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                              currentGroup === index ? "bg-emerald-500 scale-125" : "bg-slate-300"
+                            }`}
+                          ></button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             ) : (
@@ -670,8 +729,6 @@ const MultiStepForm = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-
-            {/* Doctor Info - Compact */}
             <div className="text-center mb-6">
               <img
                 src={state.selectedDoctor.image || "https://images.pexels.com/photos/5452201/pexels-photo-5452201.jpeg"}
@@ -686,11 +743,10 @@ const MultiStepForm = () => {
                 <span className="text-slate-400">•</span>
                 <span className="text-2xl font-bold text-emerald-600">₹{state.selectedDoctor.fees}</span>
               </div>
-              {/* Consultation Type Badge */}
               <div className="mt-3">
                 <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
-                  state.consultationType === "Virtual" 
-                    ? "bg-blue-100 text-blue-700" 
+                  state.consultationType === "Virtual"
+                    ? "bg-blue-100 text-blue-700"
                     : "bg-emerald-100 text-emerald-700"
                 }`}>
                   {state.consultationType === "Virtual" ? (
@@ -704,8 +760,6 @@ const MultiStepForm = () => {
                 </span>
               </div>
             </div>
-
-            {/* Booking Form - Compact */}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
@@ -723,7 +777,6 @@ const MultiStepForm = () => {
                   ))}
                 </select>
               </div>
-
               {state.selectedDate && (
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
@@ -735,16 +788,16 @@ const MultiStepForm = () => {
                       const isBooked = state.selectedDoctor.bookedSlots?.some(slot => slot.date === state.selectedDate && slot.time === time);
                       const isSelected = state.selectedTime === time;
                       return (
-                        <button 
-                          key={time} 
-                          disabled={isBooked} 
-                          onClick={() => updateState({ selectedTime: time })} 
+                        <button
+                          key={time}
+                          disabled={isBooked}
+                          onClick={() => updateState({ selectedTime: time })}
                           className={`py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200 ${
-                            isBooked 
-                              ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
-                              : isSelected 
-                                ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md transform scale-105" 
-                                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                            isBooked
+                              ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                              : isSelected
+                              ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md transform scale-105"
+                              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                           }`}
                         >
                           {time}
@@ -754,7 +807,6 @@ const MultiStepForm = () => {
                   </div>
                 </div>
               )}
-
               <button
                 onClick={handlePayment}
                 disabled={!state.selectedDate || !state.selectedTime || state.isLoading}

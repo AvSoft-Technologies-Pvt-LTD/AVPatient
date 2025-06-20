@@ -131,7 +131,7 @@ const OrderTrackingPage = () => {
               <p className="text-sm text-gray-600">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
             </div>
             <div className="text-right">
-              <p className="text-lg font-bold text-[var(--primary-color)]">${order.total.toFixed(2)}</p>
+              <p className="text-lg font-bold text-[var(--primary-color)]">₹{order.total.toFixed(2)}</p>
               <p className="text-sm text-gray-600">{order.items.length} items</p>
             </div>
           </div>
@@ -215,7 +215,7 @@ const OrderTrackingPage = () => {
                   <p className="text-sm text-gray-600">{item.product.brand}</p>
                   <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                 </div>
-                <p className="font-semibold text-gray-900">${(item.product.price * item.quantity).toFixed(2)}</p>
+                <p className="font-semibold text-gray-900">₹{(item.product.price * item.quantity).toFixed(2)}</p>
               </div>
             ))}
           </div>

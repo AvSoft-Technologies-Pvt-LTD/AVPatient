@@ -59,7 +59,7 @@ const Login = () => {
           {loginMethod === 'otp' && (
             <>
               <div className="floating-input relative w-full mb-4" data-placeholder="Phone number">
-                <input type="tel" id="phone" value={phone} onChange={e => { const value = e.target.value; if (/^\d{0,10}$/.test(value)) setPhone(value); }} className="input-field peer" placeholder="Phone Number" maxLength="10" />
+                <input type="tel" id="phone" value={phone} onChange={e => { const value = e.target.value; if (/^\d{0,10}$/.test(value)) setPhone(value); }} className="input-field peer"  maxLength="10" />
                 <button onClick={handleSendOTP} disabled={loading || phone.length !== 10} className="mt-2 bg-[var(--primary-color)] hover:bg-[var(--accent-color)] text-white py-2 px-4 rounded-lg">{loading ? 'Sending...' : 'Send OTP'}</button>
               </div>
               {otpSent && (
@@ -74,7 +74,7 @@ const Login = () => {
           )}
           {otpError && <p className="text-red-500 text-sm mt-2">{otpError}</p>}
           <div className="flex justify-center mt-4">
-            <button onClick={() => switchLoginMethod('password')} className={`px-4 py-2 rounded-l-lg border-b-2 ${loginMethod === 'password' ? 'border-[var(--primary-color)] text-[var(--primary-color)]' : 'border-transparent text-gray-700'}`}>Email</button>
+            <button onClick={() => switchLoginMethod('password')} className={`px-4 py-2 rounded-l-lg border-b-2 ${loginMethod === 'password' ? 'border-[var(--primary-color)] text-[var(--primary-color)]' : 'border-transparent text-gray-700'}`}>Password</button>
             <button onClick={() => switchLoginMethod('otp')} className={`px-4 py-2 rounded-r-lg border-b-2 ${loginMethod === 'otp' ? 'border-[var(--primary-color)] text-[var(--primary-color)]' : 'border-transparent text-gray-700'}`}>OTP</button>
           </div>
           <p className="text-sm text-gray-600 text-center mt-6">Don't have an account?{' '}

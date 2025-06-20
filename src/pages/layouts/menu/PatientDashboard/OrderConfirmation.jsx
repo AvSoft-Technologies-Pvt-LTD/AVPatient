@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'; 
-import { useParams, Link,useLocation  } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { CheckCircle, Package, Truck, Clock, MapPin } from 'lucide-react';
 
 
@@ -106,7 +106,7 @@ const OrderConfirmationPage = () => {
           <div className="bg-gray-50 px-6 py-4 border-b">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">
-                Order #{localOrder.id}
+                Order #{localOrder.orderId}
               </h2>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(localOrder.status)}`}>
                 {localOrder.status.replace('_', ' ').toUpperCase()}
@@ -135,7 +135,7 @@ const OrderConfirmationPage = () => {
                       <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                     </div>
                     <p className="font-semibold text-gray-900">
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      ₹{(item.product.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 ))}
@@ -146,7 +146,7 @@ const OrderConfirmationPage = () => {
             <div className="border-t pt-6">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">${localOrder.subtotal.toFixed(2)}</span>
+                <span className="font-medium">₹{localOrder.subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center mb-2">
                 <span className="text-gray-600">Shipping</span>
@@ -156,11 +156,11 @@ const OrderConfirmationPage = () => {
               </div>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-gray-600">Tax</span>
-                <span className="font-medium">${localOrder.tax.toFixed(2)}</span>
+                <span className="font-medium">₹{localOrder.tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center text-lg font-semibold border-t pt-4">
                 <span>Total</span>
-                <span className="text-[var(--primary-color)]">${localOrder.total.toFixed(2)}</span>
+                <span className="text-[var(--primary-color)]">₹{localOrder.total.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -194,12 +194,12 @@ const OrderConfirmationPage = () => {
               <p className="text-sm text-gray-600">
                 <span className="font-medium">Estimated Delivery:</span> {localOrder.estimatedDelivery}
               </p>
-             <Link
-  to={`/dashboard/track-order/${localOrder.id}`}
-  state={{ order: localOrder }} className='text-[var(--accent-color)] font-medium hover:underline'
->
-  Track Your Order
-</Link>
+              <Link
+                to={`/dashboard/track-order/${localOrder.id}`}
+                state={{ order: localOrder }} className='text-[var(--accent-color)] font-medium hover:underline'
+              >
+                Track Your Order
+              </Link>
             </div>
           </div>
         </div>
@@ -208,7 +208,7 @@ const OrderConfirmationPage = () => {
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h3 className="text-lg font-semibold mb-6">Order Timeline</h3>
           <div className="space-y-4">
-            {localOrder .timeline.map((event, index) => (
+            {localOrder.timeline.map((event, index) => (
               <div key={index} className="flex items-start space-x-3">
                 <div className="flex-shrink-0">
                   {getStatusIcon(event.status)}
@@ -236,7 +236,7 @@ const OrderConfirmationPage = () => {
             Continue Shopping
           </Link>
           <Link
-            to=""
+            to="/dashboard/orders"
             className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 text-center"
           >
             View All Orders
