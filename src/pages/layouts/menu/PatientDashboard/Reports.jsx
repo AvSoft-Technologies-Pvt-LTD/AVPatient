@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FiDownload, FiSend, FiCheck } from "react-icons/fi";
+import Pagination from '../../../../components/Pagination'; // Adjust path if needed
 
 const Report = () => {
   const [reports, setReports] = useState([]),
@@ -13,7 +14,7 @@ const Report = () => {
       file: ""
     }),
     [page, setPage] = useState(1),
-    rowsPerPage = 5,
+    rowsPerPage = 4,
     totalPages = Math.ceil(reports.length / rowsPerPage),
     paginatedReports = reports.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
@@ -176,13 +177,13 @@ const Report = () => {
             ))}
           </tbody>
         </table>
-        <div className="w-full max-w-4xl ml-auto mt-4">
-          <div className="flex justify-end items-center gap-2">
-            <button className="edit-btn" onClick={() => setPage(page - 1)} disabled={page === 1}>Previous</button>
-            <span className="paragraph">Page {page} of {totalPages}</span>
-            <button className="edit-btn" onClick={() => setPage(page + 1)} disabled={page === totalPages}>Next</button>
-          </div>
-        </div>
+       <div className="w-full  flex justify-end mt-4">
+  <Pagination
+    page={page}
+    totalPages={totalPages}
+    onPageChange={(newPage) => setPage(newPage)}
+  />
+</div>
       </div>
     </>
   );

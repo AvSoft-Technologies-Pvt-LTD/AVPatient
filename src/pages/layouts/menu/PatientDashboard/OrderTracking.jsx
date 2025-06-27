@@ -7,56 +7,54 @@ const API_BASE = 'https://684ac997165d05c5d35a5118.mockapi.io/orders';
 
 const OrderTrackingPage = () => {
   const { orderId } = useParams();
-  const { state } = useLocation();
-  const [order, setOrder] = useState(state?.order || null);
+   const { state } = useLocation();
+   const [localOrder, setLocalOrder] = useState(state?.order);
   const [autoUpdate, setAutoUpdate] = useState(true);
-
   // Fetch from API if not passed via location.state
-  const fetchOrder = async () => {
-    try {
-      const res = await axios.get(`${API_BASE}/${orderId}`);
-      setOrder(res.data);
-    } catch (err) {
-      console.error('Error fetching order:', err);
-    }
-  };
+const fetchOrder = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/${orderId}`);
+    setLocalOrder(res.data);
+  } catch (err) {
+    console.error('Error fetching order:', err);
+  }
+};
 
   const updateOrderStatus = async (newStatus) => {
-    const updatedTimeline = [
-      ...order.timeline,
-      {
-        status: newStatus,
-        timestamp: new Date().toISOString(),
-        description: `Order ${newStatus.replace('_', ' ')} by system`,
-      },
-    ];
-
-    const updatedOrder = {
-      ...order,
+  const updatedTimeline = [
+    ...localOrder.timeline,
+    {
       status: newStatus,
-      timeline: updatedTimeline,
-      updatedAt: new Date().toISOString(),
-    };
-
-    try {
-      await axios.put(`${API_BASE}/${orderId}`, updatedOrder);
-      setOrder(updatedOrder);
-    } catch (err) {
-      console.error('Error updating status:', err);
-    }
+      timestamp: new Date().toISOString(),
+      description: `Order ${newStatus.replace('_', ' ')} by system`,
+    },
+  ];
+      const updatedOrder = {
+    ...localOrder,
+    status: newStatus,
+    timeline: updatedTimeline,
+    updatedAt: new Date().toISOString(),
   };
 
+  try {
+    await axios.put(`${API_BASE}/${orderId}`, updatedOrder);
+    setLocalOrder(updatedOrder);
+  } catch (err) {
+    console.error('Error updating status:', err);
+  }
+};
+
   useEffect(() => {
-    if (!order) {
+    if (!localOrder) {
       fetchOrder();
     }
   }, [orderId]);
 
   useEffect(() => {
-    if (!order || !autoUpdate) return;
+    if (!localOrder || !autoUpdate) return;
 
     const statusProgression = ['pending', 'confirmed', 'processing', 'dispatched', 'in_transit', 'delivered'];
-    const currentIndex = statusProgression.indexOf(order.status);
+    const currentIndex = statusProgression.indexOf(localOrder.status);
 
     if (currentIndex < statusProgression.length - 1) {
       const timer = setTimeout(() => {
@@ -67,9 +65,9 @@ const OrderTrackingPage = () => {
     } else {
       setAutoUpdate(false);
     }
-  }, [order, autoUpdate]);
+  }, [localOrder, autoUpdate]);
 
-  if (!order) {
+  if (!localOrder) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -91,8 +89,8 @@ const OrderTrackingPage = () => {
   ];
 
   const getStepStatus = (stepStatus) => {
-    const isCompleted = order.timeline.some(t => t.status === stepStatus);
-    const isCurrent = order.status === stepStatus;
+    const isCompleted = localOrder.timeline.some(t => t.status === stepStatus);
+    const isCurrent = localOrder.status === stepStatus;
     return { isCompleted, isCurrent };
   };
 
@@ -115,40 +113,45 @@ const OrderTrackingPage = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Link to="" className="inline-flex items-center text-[var(--primary-color)] hover:text-[var(--accent-color)] mb-4">
+          <Link to="/dashboard/orders" className="inline-flex items-center text-[var(--primary-color)] hover:text-[var(--accent-color)] mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Orders
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Track Your Order</h1>
-          <p className="text-gray-600">Order #{order.id}</p>
+          <h1 className="h3-heading">Track Your Order</h1>
+          <p className="text-gray-600">Order #{localOrder.orderId}</p>
         </div>
 
         {/* Order Summary */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Order Details</h2>
-              <p className="text-sm text-gray-600">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
+              <h2 className="h4-heading">Order Details</h2>
+              <p className="text-sm text-gray-600">Placed on {new Date(localOrder.createdAt).toLocaleDateString()}</p>
             </div>
             <div className="text-right">
+<<<<<<< HEAD
               <p className="text-lg font-bold text-[var(--primary-color)]">₹{order.total.toFixed(2)}</p>
               <p className="text-sm text-gray-600">{order.items.length} items</p>
+=======
+              <p className="text-lg font-bold text-[var(--primary-color)]">₹{localOrder.total.toFixed(2)}</p>
+              <p className="text-sm text-gray-600">{localOrder.items.length} items</p>
+>>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h3 className="font-medium text-gray-900 mb-2">Shipping Address</h3>
               <div className="text-sm text-gray-600">
-                <p>{order.shippingAddress.street}</p>
-                <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</p>
-                <p>{order.shippingAddress.country}</p>
+                <p>{localOrder.shippingAddress.street}</p>
+                <p>{localOrder.shippingAddress.city}, {localOrder.shippingAddress.state} {localOrder.shippingAddress.zipCode}</p>
+                <p>{localOrder.shippingAddress.country}</p>
               </div>
             </div>
             <div>
               <h3 className="font-medium text-gray-900 mb-2">Tracking Info</h3>
               <div className="text-sm text-gray-600">
-                <p><span className="font-medium">Tracking #:</span> {order.trackingNumber}</p>
-                <p><span className="font-medium">Est. Delivery:</span> {order.estimatedDelivery}</p>
+                <p><span className="font-medium">Tracking #:</span> {localOrder.trackingNumber}</p>
+                <p><span className="font-medium">Est. Delivery:</span> {localOrder.estimatedDelivery}</p>
               </div>
             </div>
           </div>
@@ -159,7 +162,7 @@ const OrderTrackingPage = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Tracking Progress</h2>
           <div className="relative">
             <div className="absolute top-8 left-8 right-8 h-0.5 bg-gray-200">
-              <div className="h-full bg-green-500 transition-all duration-1000" style={{ width: `${(order.timeline.length - 1) * 25}%` }} />
+              <div className="h-full bg-green-500 transition-all duration-1000" style={{ width: `${(localOrder.timeline.length - 1) * 25}%` }} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
               {trackingSteps.map((step) => {
@@ -175,7 +178,7 @@ const OrderTrackingPage = () => {
                       <p className={`text-xs ${isCompleted || isCurrent ? 'text-gray-600' : 'text-gray-400'}`}>{step.description}</p>
                       {isCompleted && (
                         <p className="text-xs text-green-600 mt-1">
-                          {new Date(order.timeline.find(t => t.status === step.status)?.timestamp || '').toLocaleString()}
+                          {new Date(localOrder.timeline.find(t => t.status === step.status)?.timestamp || '').toLocaleString()}
                         </p>
                       )}
                     </div>
@@ -192,12 +195,12 @@ const OrderTrackingPage = () => {
             <Clock className="h-6 w-6 text-[var(--primary-color)] mt-1" />
             <div>
               <h3 className="font-semibold text-blue-900 mb-1">Current Status</h3>
-              <p className="text-blue-800 capitalize">{order.status.replace('_', ' ')}</p>
+              <p className="text-blue-800 capitalize">{localOrder.status.replace('_', ' ')}</p>
               <p className="text-sm text-[var(--accent-color)] mt-1">
-                {order.timeline[order.timeline.length - 1]?.description}
+                {localOrder.timeline[localOrder.timeline.length - 1]?.description}
               </p>
               <p className="text-xs text-[var(--primary-color)] mt-1">
-                Last updated: {new Date(order.updatedAt).toLocaleString()}
+                Last updated: {new Date(localOrder.updatedAt).toLocaleString()}
               </p>
             </div>
           </div>
@@ -207,7 +210,7 @@ const OrderTrackingPage = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Items in this order</h3>
           <div className="space-y-4">
-            {order.items.map((item) => (
+            {localOrder.items.map((item) => (
               <div key={item.product.id} className="flex items-center space-x-4 pb-4 border-b last:border-b-0">
                 <img src={item.product.image} alt={item.product.name} className="w-16 h-16 object-cover rounded-lg" />
                 <div className="flex-1">
@@ -215,14 +218,19 @@ const OrderTrackingPage = () => {
                   <p className="text-sm text-gray-600">{item.product.brand}</p>
                   <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                 </div>
+<<<<<<< HEAD
                 <p className="font-semibold text-gray-900">₹{(item.product.price * item.quantity).toFixed(2)}</p>
+=======
+                <p className="font-semibold text-gray-900">₹
+                  {(item.product.price * item.quantity).toFixed(2)}</p>
+>>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
               </div>
             ))}
           </div>
         </div>
 
         {/* Auto Update Notice */}
-        {autoUpdate && order.status !== 'delivered' && (
+        {autoUpdate && localOrder.status !== 'delivered' && (
           <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-800">
               🔄 This page will automatically update as your order progresses.

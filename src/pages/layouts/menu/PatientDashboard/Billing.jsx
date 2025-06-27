@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaDownload, FaPrint, FaFileInvoice } from 'react-icons/fa';
+import Pagination from '../../../../components/Pagination'; // Adjust path if needed
+
 const BillingTable = () => {
   const [p, setP] = useState([]), [l, setL] = useState(true), [e, setE] = useState(null), [s, setS] = useState(null);
-  const [page, setPage] = useState(1), rowsPerPage = 6;
+  const [page, setPage] = useState(1), rowsPerPage = 4;
   useEffect(() => { f(); }, []);
   const f = async () => { try { const r = await axios.get('https://681b32bd17018fe5057a8bcb.mockapi.io/paybook'); setP(r.data); setL(false); } catch { setE('Failed to fetch payment data'); setL(false); } };
   const getInvoiceTemplate = (i) => ``;
@@ -33,11 +35,13 @@ const BillingTable = () => {
 </td></tr>  ))}
           </tbody>  </table>
       </div>
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <button className="edit-btn" onClick={() => setPage(page - 1)} disabled={page === 1}>Previous</button>
-        <span className="paragraph">Page {page} of {totalPages}</span>
-        <button className="edit-btn" onClick={() => setPage(page + 1)} disabled={page === totalPages}>Next</button>
-      </div>
+         <div className="w-full  flex justify-end mt-4">
+  <Pagination
+    page={page}
+    totalPages={totalPages}
+    onPageChange={(newPage) => setPage(newPage)}
+  />
+</div>
       {s && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto transition-all duration-300 print:max-w-none print:rounded-none print:shadow-none print:h-auto print:overflow-visible">

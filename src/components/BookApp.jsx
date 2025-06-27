@@ -423,9 +423,6 @@ const [formSteps, setFormSteps] = useState([]);
       <div className="max-w-3xl mx-auto">
         {/* Compact Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl mb-4 shadow-lg">
-            <FaStethoscope className="text-white text-2xl" />
-          </div>
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">
             Book Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">Appointment</span>
           </h1>
@@ -766,16 +763,15 @@ const [formSteps, setFormSteps] = useState([]);
                   <FaCalendarAlt className="text-emerald-500 text-xs" />
                   Select Date
                 </label>
-                <select
-                  className="w-full p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm"
-                  value={state.selectedDate}
-                  onChange={(e) => updateState({ selectedDate: e.target.value, selectedTime: '' })}
-                >
-                  <option value="">Choose a Date</option>
-                  {state.selectedDoctor.availability?.map(slot => (
-                    <option key={slot.date} value={slot.date}>{slot.date}</option>
-                  ))}
-                </select>
+               
+<input
+  type="date"
+  className="w-full p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm"
+  value={state.selectedDate}
+  min={new Date().toISOString().split("T")[0]}
+  onChange={(e) => updateState({ selectedDate: e.target.value, selectedTime: '' })}
+/>
+
               </div>
               {state.selectedDate && (
                 <div>

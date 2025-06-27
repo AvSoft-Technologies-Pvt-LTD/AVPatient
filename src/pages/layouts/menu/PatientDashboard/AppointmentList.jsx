@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiCalendar, FiArrowRight, FiMapPin } from "react-icons/fi";
+import Pagination from "../../../../components/Pagination"; // Adjust path if needed
 
 const AppointmentList = () => {
   const navigate = useNavigate();
   // Initialize from localStorage if available
   const initialType = localStorage.getItem("appointmentTab") || "doctor";
   const [s, setS] = useState({ t: initialType, l: [], d: [], p: [], s: false, i: 0 });
-  const [currentPage, setCurrentPage] = useState(1), [itemsPerPage] = useState(5);
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 4;
 
   useEffect(() => {
     // Save selected tab to localStorage whenever it changes
@@ -53,12 +55,23 @@ const AppointmentList = () => {
       Cancelled: "bg-red-100 text-red-600",
     }[s] || "bg-gray-100 text-gray-800");
 
-  const c = s.p[s.i] || [], a = c[0];
-  const indexOfLastItem = currentPage * itemsPerPage, indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentDoctorAppointments = s.d.slice(indexOfFirstItem, indexOfLastItem), currentLabAppointments = s.l.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPagesDoctor = Math.ceil(s.d.length / itemsPerPage), totalPagesLab = Math.ceil(s.l.length / itemsPerPage);
+const totalDoctorPages = Math.ceil(s.d.length / rowsPerPage);
+const currentDoctorAppointments = s.d.slice(
+  (page - 1) * rowsPerPage,
+  page * rowsPerPage
+);
 
-  const handlePageChange = (page) => page >= 1 && page <= (s.t === "doctor" ? totalPagesDoctor : totalPagesLab) && setCurrentPage(page);
+const totalLabPages = Math.ceil(s.l.length / rowsPerPage);
+const currentLabAppointments = s.l.slice(
+  (page - 1) * rowsPerPage,
+  page * rowsPerPage
+);
+
+const totalPages = s.t === "doctor" ? totalDoctorPages : totalLabPages;
+
+const handlePageChange = (newPage) => {
+  setPage(newPage);
+};
 
   return (
     <div className="pt-6 bg-white p-6 rounded-2xl shadow-lg">
@@ -120,11 +133,8 @@ const AppointmentList = () => {
               ))}
             </tbody>
           </table>
-          <div className="flex justify-center items-center mt-4 gap-4">
-            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="edit-btn">Previous</button>
-            <span className="text-sm">Page {currentPage} of {totalPagesDoctor}</span>
-            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPagesDoctor} className="edit-btn">Next</button>
-          </div>
+                   <div className="w-full  flex justify-end mt-4">  <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} /></div>
+
         </div>
       )}
       {s.t === "lab" && (
@@ -153,11 +163,8 @@ const AppointmentList = () => {
               ))}
             </tbody>
           </table>
-          <div className="flex justify-center items-center mt-4 gap-4">
-            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="edit-btn">Previous</button>
-            <span className="text-sm">Page {currentPage} of {totalPagesLab}</span>
-            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPagesLab} className="edit-btn">Next</button>
-          </div>
+                  <div className="w-full  flex justify-end mt-4">  <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} /></div>
+
         </div>
       )}
     </div>
@@ -165,3 +172,10 @@ const AppointmentList = () => {
 };
 
 export default AppointmentList;
+
+
+
+
+
+
+

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FileText } from 'lucide-react';
+import Pagination from '../../../../components/Pagination'; // Adjust path if needed
+
 const MedicalRecords = () => {
   const [records, setRecords] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
@@ -49,15 +51,13 @@ const MedicalRecords = () => {
                   <span className="absolute inset-0 rounded-full animate-[subtle-glow_1.8s_ease-in-out_infinite] opacity-60 z-0" />
                   <FileText className="w-5 h-5 relative z-10 transition-all duration-300 group-hover:animate-[paper-wobble_0.6s]" />
                 </button> </td> </tr>   ))} </tbody>  </table>
-      <div className="flex justify-end items-center gap-4 mt-4">
-        <button  className="edit-btn"
-          onClick={() => setPage(page - 1)}
-          disabled={page === 1}> Previous
-        </button> <span className="paragraph">
-          Page {page} of {totalPages} </span>
-        <button className="edit-btn"
-          onClick={() => setPage(page + 1)}
-          disabled={page === totalPages}>  Next</button> </div>
+         <div className="w-full  flex justify-end mt-4">
+  <Pagination
+    page={page}
+    totalPages={totalPages}
+    onPageChange={(newPage) => setPage(newPage)}
+  />
+</div>
       {isModalOpen && selectedNote && (
         <div className="fixed inset-0 bg-black/40 flex justify-end items-center z-50">
           <div className="relative bg-[var(--color-surface)] px-6 pt-6 pb-10 rounded-xl shadow-xl w-full max-w-md border border-[var(--color-overlay)] animate-fadeIn overflow-hidden">
