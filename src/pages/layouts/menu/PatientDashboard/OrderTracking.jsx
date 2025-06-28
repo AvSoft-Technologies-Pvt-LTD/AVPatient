@@ -129,13 +129,11 @@ const fetchOrder = async () => {
               <p className="text-sm text-gray-600">Placed on {new Date(localOrder.createdAt).toLocaleDateString()}</p>
             </div>
             <div className="text-right">
-<<<<<<< HEAD
               <p className="text-lg font-bold text-[var(--primary-color)]">₹{order.total.toFixed(2)}</p>
               <p className="text-sm text-gray-600">{order.items.length} items</p>
-=======
+
               <p className="text-lg font-bold text-[var(--primary-color)]">₹{localOrder.total.toFixed(2)}</p>
               <p className="text-sm text-gray-600">{localOrder.items.length} items</p>
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -218,12 +216,9 @@ const fetchOrder = async () => {
                   <p className="text-sm text-gray-600">{item.product.brand}</p>
                   <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                 </div>
-<<<<<<< HEAD
                 <p className="font-semibold text-gray-900">₹{(item.product.price * item.quantity).toFixed(2)}</p>
-=======
                 <p className="font-semibold text-gray-900">₹
                   {(item.product.price * item.quantity).toFixed(2)}</p>
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
               </div>
             ))}
           </div>

@@ -39,15 +39,11 @@ const AllOrdersPage = () => {
 
     if (userId) fetchOrders();
   }, [userId]);
-<<<<<<< HEAD
-
-=======
 const handleSearch = (e) => {
     e.preventDefault();
     console.log('Search query:', searchQuery);
     // Implement search functionality here
   };
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
   if (loading) return <p className="text-center py-10 text-gray-500">Loading your orders...</p>;
 
   return (
@@ -111,8 +107,4 @@ const handleSearch = (e) => {
   );
 };
 
-<<<<<<< HEAD
 export default AllOrdersPage;
-=======
-export default AllOrdersPage;
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)

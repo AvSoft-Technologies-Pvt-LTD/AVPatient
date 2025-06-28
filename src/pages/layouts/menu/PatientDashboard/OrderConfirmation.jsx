@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-<<<<<<< HEAD
-import { CheckCircle, Package, Truck, Clock, MapPin } from 'lucide-react';
-
-
-=======
 import { CheckCircle, Package, Truck, Clock, MapPin,ShoppingCart, ClipboardList } from 'lucide-react';
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
 const OrderConfirmationPage = () => {
   // const { orderId } = useParams();
   const { state } = useLocation();
@@ -103,22 +97,6 @@ const OrderConfirmationPage = () => {
           <p className="mt-2 text-gray-600">Thank you for your purchase. We'll notify you with shipping updates.</p>
         </div>
 
-<<<<<<< HEAD
-        {/* Order Details */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-          <div className="bg-gray-50 px-6 py-4 border-b">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Order #{localOrder.orderId}
-              </h2>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(localOrder.status)}`}>
-                {localOrder.status.replace('_', ' ').toUpperCase()}
-              </span>
-            </div>
-            <p className="text-sm text-gray-600 mt-1">
-              Placed on {new Date(localOrder.createdAt).toLocaleDateString()}
-            </p>
-=======
         {/* Order Card */}
         <div className="bg-white shadow-xl rounded-xl p-6 mb-10">
           <div className="flex justify-between items-center border-b pb-4 mb-4">
@@ -126,59 +104,9 @@ const OrderConfirmationPage = () => {
             <span className={`px-4 py-1 rounded-full text-sm font-semibold uppercase ${getStatusColor(localOrder.status)}`}>
               {localOrder.status.replace('_', ' ')}
             </span>
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
           </div>
           <div className="text-sm text-gray-500 mb-4">Placed on {new Date(localOrder.createdAt).toLocaleDateString()}</div>
 
-<<<<<<< HEAD
-          <div className="p-6">
-            {/* Order Items */}
-            <div className="mb-6">
-              <h3 className="text-lg font-medium mb-4">Items Ordered</h3>
-              <div className="space-y-4">
-                {localOrder.items.map((item) => (
-                  <div key={item.product.id} className="flex items-center space-x-4">
-                    <img
-                      src={item.product.image}
-                      alt={item.product.name}
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{item.product.name}</h4>
-                      <p className="text-sm text-gray-600">{item.product.brand}</p>
-                      <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                    </div>
-                    <p className="font-semibold text-gray-900">
-                      ₹{(item.product.price * item.quantity).toFixed(2)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Order Summary */}
-            <div className="border-t pt-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">₹{localOrder.subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-600">Shipping</span>
-                <span className="font-medium">
-                  {localOrder.shipping === 0 ? 'Free' : `${localOrder.shipping.toFixed(2)}`}
-                </span>
-              </div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-gray-600">Tax</span>
-                <span className="font-medium">₹{localOrder.tax.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center text-lg font-semibold border-t pt-4">
-                <span>Total</span>
-                <span className="text-[var(--primary-color)]">₹{localOrder.total.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-=======
          {/* Items and Summary in One Row */}
 <div className="flex flex-col md:flex-row gap-6 rounded-lg p-6shadow-sm">
   
@@ -225,7 +153,6 @@ const OrderConfirmationPage = () => {
   </div>
 </div>
 
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
         </div>
 
         {/* Info Cards */}
@@ -238,69 +165,6 @@ const OrderConfirmationPage = () => {
               <p>{localOrder.shippingAddress.country}</p>
             </div>
           </div>
-<<<<<<< HEAD
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Truck className="h-5 w-5 mr-2 text-[var(--primary-color)]" />
-              Tracking Information
-            </h3>
-            <div className="space-y-2">
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">Tracking Number:</span> {localOrder.trackingNumber}
-              </p>
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">Estimated Delivery:</span> {localOrder.estimatedDelivery}
-              </p>
-              <Link
-                to={`/dashboard/track-order/${localOrder.id}`}
-                state={{ order: localOrder }} className='text-[var(--accent-color)] font-medium hover:underline'
-              >
-                Track Your Order
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Order Timeline */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h3 className="text-lg font-semibold mb-6">Order Timeline</h3>
-          <div className="space-y-4">
-            {localOrder.timeline.map((event, index) => (
-              <div key={index} className="flex items-start space-x-3">
-                <div className="flex-shrink-0">
-                  {getStatusIcon(event.status)}
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900 capitalize">
-                    {event.status.replace('_', ' ')}
-                  </p>
-                  <p className="text-sm text-gray-600">{event.description}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(event.timestamp).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            to="/dashboard/shopping"
-            className="px-6 py-3 bg-[var(--primary-color)] text-white rounded-lg font-medium hover:bg-[var(--accent-color)] text-center"
-          >
-            Continue Shopping
-          </Link>
-          <Link
-            to="/dashboard/orders"
-            className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 text-center"
-          >
-            View All Orders
-          </Link>
-        </div>
-=======
           <div className="bg-white rounded-xl shadow p-6">
             <h3 className="text-lg font-semibold mb-2 flex items-center"><Truck className="h-5 w-5 mr-2" />Tracking Info</h3>
             <div className="text-sm text-gray-700 space-y-1">
@@ -328,7 +192,6 @@ const OrderConfirmationPage = () => {
     View All Orders
   </Link>
 </div>
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
       </div>
     </div>
   );

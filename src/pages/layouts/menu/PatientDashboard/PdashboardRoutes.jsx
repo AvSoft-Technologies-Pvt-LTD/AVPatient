@@ -32,9 +32,6 @@ import  AllOrdersPage  from "./AllOrdersPage";
 import ProductDetail from './ProductDetail';
 import OrderTracking from "./OrderTracking";
 import CartProduct from "./CartProduct";
-import  AllOrdersPage  from "./AllOrdersPage";
-import ProductDetail from './ProductDetail';
-
 const PdashboardRoutes = () => {
   return (
     <Routes>
@@ -66,11 +63,10 @@ const PdashboardRoutes = () => {
       <Route path="/checkout" element={<CheckOut />} />
       <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
       <Route path="/track-order/:orderId" element={<OrderTracking />} />
-<<<<<<< HEAD
+
           <Route path="/product/:id" element={<ProductDetail />} />
-=======
-            <Route path="/product/:id" element={<ProductDetail />} />
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
+
+
       <Route path="/orders" element={<AllOrdersPage />} />
       <Route path="ambulance" element={<Emergency/>} />
       <Route path="pharmacy" element={<NearbyPharmacies/>} />

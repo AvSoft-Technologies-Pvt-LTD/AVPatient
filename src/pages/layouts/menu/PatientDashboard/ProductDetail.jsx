@@ -1,27 +1,16 @@
-<<<<<<< HEAD
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
-import { ShoppingCart, CheckCircle,Check  } from 'lucide-react';
-=======
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ShoppingCart, CheckCircle, Check } from 'lucide-react';
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
 import { useCart } from '../../../../context-api/productcartSlice';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [showToast, setShowToast] = useState(false);
-<<<<<<< HEAD
-  const { addItem } = useCart();
-=======
   const { addItem, itemCount } = useCart();
   const cartRef = useRef(null);
 
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -42,8 +31,6 @@ const ProductDetail = () => {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
   };
-<<<<<<< HEAD
-=======
   const animateFlyToCart = (sourceEl) => {
   if (!sourceEl || !cartRef.current) return;
 
@@ -85,14 +72,11 @@ const ProductDetail = () => {
     setTimeout(() => cartRef.current.classList.remove('cart-bounce'), 400);
   };
 };
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
 
   if (!product) return <p className="text-center py-10">Loading product...</p>;
 
   return (
     <div className="relative max-w-6xl mx-auto px-4 py-10">
-<<<<<<< HEAD
-=======
       <header className=" sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -130,7 +114,6 @@ const ProductDetail = () => {
         </div>
       </header>
       
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
       {showToast && (
         <div className="fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in-down z-50">
           <CheckCircle className="w-5 h-5" />
@@ -138,15 +121,6 @@ const ProductDetail = () => {
         </div>
       )}
 
-<<<<<<< HEAD
-      <Link
-        to="/dashboard/shopping"
-        className="text-[var(--primary-color)] hover:underline text-sm font-medium mb-6 inline-block"
-      >
-        ← Back to Products
-      </Link>
-=======
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-white p-8 rounded-2xl shadow-xl">
         {/* Product Image */}
@@ -189,16 +163,6 @@ const ProductDetail = () => {
 
           {/* Features List */}
           {product.features && (
-<<<<<<< HEAD
-           <ul className="pl-5 text-sm text-[var(--primary-color)] space-y-2 mb-4">
-  {product.features.map((feature, index) => (
-    <li key={index} className="flex items-start gap-2">
-      <Check className="w-4 h-4 mt-1 text-green-600" />
-      <span>{feature}</span>
-    </li>
-  ))}
-</ul>
-=======
             <ul className="pl-5 text-sm text-[var(--primary-color)] space-y-2 mb-4">
               {product.features.map((feature, index) => (
                 <li key={index} className="flex items-start gap-2">
@@ -207,7 +171,6 @@ const ProductDetail = () => {
                 </li>
               ))}
             </ul>
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
           )}
 
           {/* Stock Alert */}
@@ -218,22 +181,6 @@ const ProductDetail = () => {
           )}
 
           {/* Add to Cart */}
-<<<<<<< HEAD
-          <button
-            onClick={handleAddToCart}
-            disabled={!product.inStock}
-            className={`flex items-center view-btn ${
-              product.inStock
-                ? 'view-btn'
-                : 'edit-btn'
-            }`}
-          >
-            <ShoppingCart className="w-5 h-5" />
-            {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-          </button>
-        </div>
-      </div>
-=======
                <button
   onClick={(e) => {
     handleAddToCart();
@@ -256,13 +203,8 @@ const ProductDetail = () => {
     50% { transform: scale(1.3); box-shadow: 0 0 10px 3px rgba(255, 165, 0, 0.7); }
   }
 `}</style>
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
     </div>
   );
 };
 
-<<<<<<< HEAD
 export default ProductDetail;
-=======
-export default ProductDetail;
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)

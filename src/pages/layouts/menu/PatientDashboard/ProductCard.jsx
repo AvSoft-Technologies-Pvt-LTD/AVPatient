@@ -16,122 +16,6 @@ import axios from 'axios';
 
 import { useCart } from '../../../../context-api/productcartSlice';
 
-<<<<<<< HEAD
-const ProductCard = ({ product, updateCartCount }) => {
-  const { addItem } = useCart();
- 
-    const handleAddToCart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addItem(product);
-    updateCartCount(); // Update the cart count
-  };
-
-  const renderStars = (rating) => {
-    return Array.from({ length: 5 }, (_, index) => (
-      <Star
-        key={index}
-        className={`h-4 w-4 ${
-          index < Math.floor(rating)
-            ? 'text-yellow-400 fill-current '
-            : 'text-gray-300'
-        }`}
-      />
-    ));
-  };
-
-  return (
-    <Link to={`/dashboard/product/${product.id}`} className="group">
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden ">
-        {/* Image Container */}
-        <div className="relative overflow-hidden">
-          <div className="relative flex items-center justify-center h-48 overflow-hidden">
-  <img
-    src={product.image}
-    alt={product.name}
-    className="object-contain h-full transition-transform duration-300 group-hover:scale-110"
-  />
-
-  {product.originalPrice && (
-    <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-semibold">
-      SAVE ₹{(product.originalPrice - product.price).toFixed(2)}
-    </div>
-  )}
-</div>
-
-          <button className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-50">
-            <Heart className="h-4 w-4 text-gray-600" />
-          </button>
-          {!product.inStock && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <span className="text-white font-semibold text-lg">Out of Stock</span>
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="p-4">
-          {/* Brand & Category */}
-          <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-            <span className="font-medium">{product.brand}</span>
-            <span>{product.category}</span>
-          </div>
-
-          {/* Product Name */}
-          <h3 className="font-semibold text-sm text-gray-900 mb-2">
-            {product.name}
-          </h3>
-
-          {/* Rating */}
-          <div className="flex items-center space-x-1 mb-3">
-            <div className="flex ">
-              {renderStars(product.rating)}
-            </div>
-            <span className="text-xs text-gray-600">
-              ({product.reviews})
-            </span>
-          </div>
-
-          {/* Price */}
-          <div className="flex items-center space-x-2 mb-4">
-            <span className=" font-semibold ">
-              ₹{product.price.toFixed(2)}
-            </span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-500 line-through">
-                ₹{product.originalPrice.toFixed(2)}
-              </span>
-            )}
-          </div>
-
-          {/* Add to Cart Button */}
-         <button
-            onClick={handleAddToCart}
-            disabled={!product.inStock}
-            className={`view-btn flex items-center justify-center space-x-2 py-2 px-4 rounded-lg font-medium transition-colors ${
-              product.inStock
-                ? 'view-btn'
-                : 'edit-btn'
-            }`}
-          >
-            <ShoppingCart className="h-4 w-4" />
-            <span>{product.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
-          </button>
-
-          {/* Stock Info */}
-          {product.inStock && product.stockQuantity <= 10 && (
-            <p className="text-xs text-orange-600 mt-2 text-center">
-              Only {product.stockQuantity} left in stock!
-            </p>
-          )}
-        </div>
-      </div>
-    </Link>
-  );
-};
-
-=======
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
@@ -148,11 +32,7 @@ const ProductsPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-<<<<<<< HEAD
-        const response = await axios.get('https://mocki.io/v1/7fca606c-abc8-4397-b797-a380fc8be7d7'); // Replace with your API endpoint
-=======
         const response = await axios.get('https://mocki.io/v1/7fca606c-abc8-4397-b797-a380fc8be7d7');
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
         setProducts(response.data);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -328,24 +208,6 @@ const ProductsPage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-<<<<<<< HEAD
-        <header className="  top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="hidden md:flex flex-1 max-w-lg mx-8">
-                <form onSubmit={handleSearch} className="w-full">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search medical supplies..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary-color)] focus:border-transparent"
-                    />
-                    <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  </div>
-                </form>
-=======
         <header className="sticky top-0 z-50 bg-gray-50">
           <div className="flex items-center justify-between h-16">
             <form onSubmit={handleSearch} className="hidden md:flex w-full max-w-md mr-4">
@@ -358,18 +220,9 @@ const ProductsPage = () => {
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary-color)]"
                 />
                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
               </div>
             </form>
 
-<<<<<<< HEAD
-              {/* Navigation - Desktop */}
-              <nav className="hidden md:flex items-center space-x-6">
-                <Link to="/dashboard/orders" className="text-gray-700 hover:text-[var(--primary-color)] font-medium">
-                  Orders
-                </Link>
-                
-=======
             <nav className="hidden md:flex items-center space-x-6">
               <Link to="/dashboard/orders" className="text-gray-700 hover:text-[var(--primary-color)] font-medium">Orders</Link>
               <Link to="/dashboard/cartproduct" ref={cartRef} className="relative p-2 text-gray-700 hover:text-[var(--primary-color)]">
@@ -381,7 +234,6 @@ const ProductsPage = () => {
                 )}
               </Link>
             </nav>
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
 
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 text-gray-700">
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -435,11 +287,6 @@ const ProductsPage = () => {
                       ))}
                     </div>
                   </div>
-<<<<<<< HEAD
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>₹{priceRange[0]}</span>
-                    <span>₹{priceRange[1]}</span>
-=======
                   {/* Price Range Filter */}
                   <div className="mb-6">
                     <h4 className="font-medium text-gray-900 mb-3">Price Range</h4>
@@ -472,7 +319,6 @@ const ProductsPage = () => {
                       />
                       <span className="ml-2 text-sm text-gray-700">In Stock Only</span>
                     </label>
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
                   </div>
                 </div>
               </div>
