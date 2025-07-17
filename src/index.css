@@ -966,50 +966,25 @@ body {
   color: #fff !important;
 }
 
-<<<<<<< HEAD
-/* Ambulance blink */
-=======
 
 /* Ambulance Blink */
->>>>>>> 01321363 (Fix: Downgrade Vite to stable and clean dependencies)
-.blink-bg {
-  animation: blinkRedShine 1s linear infinite, bounceBtn 1s linear infinite;
-}
-
-@keyframes blinkRedShine {
-
-  0%,
-  100% {
-    background-color: transparent;
-    box-shadow: none;
+@keyframes shine-blink {
+  0% {
+    text-shadow: 0 0 2px #fff, 0 0 5px #FF4D4D, 0 0 10px #FF4D4D;
+    transform: scale(1);
+    opacity: 1;
   }
-
   50% {
-    background-color: #EF4444;
-    box-shadow: 0 0 16px 4px #EF4444, 0 0 32px 8px #fff3;
+    text-shadow: 0 0 8px #fff, 0 0 12px #FF4D4D, 0 0 20px #FF0000;
+    transform: scale(1.15);
+    opacity: 0.7;
+  }
+  100% {
+    text-shadow: 0 0 2px #fff, 0 0 5px #FF4D4D, 0 0 10px #FF4D4D;
+    transform: scale(1);
+    opacity: 1;
   }
 }
-
-@keyframes bounceBtn {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  20% {
-    transform: translateY(-8px);
-  }
-
-  40% {
-    transform: translateY(0);
-  }
-
-  60% {
-    transform: translateY(-4px);
-  }
-
-  80% {
-    transform: translateY(0);
-  }
+.shine-blink {
+  animation: shine-blink 1s infinite;
 }
